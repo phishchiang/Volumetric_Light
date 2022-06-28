@@ -21,7 +21,7 @@ void main()	{
 		// float weight = 1.0;
 		float weight = sin(lerp * PI);
 
-		vec4 t_sample = texture2D(u_map, vUv + uv_to_center * 0.2 * lerp);
+		vec4 t_sample = texture2D(u_map, vUv + uv_to_center * 0.3 * lerp);
 
 		t_sample.rgb = t_sample.rgb * t_sample.a;
 		color += t_sample * weight;

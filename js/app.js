@@ -46,16 +46,16 @@ export default class Sketch {
     );
     
     
-    // var frustumSize = 10;
-    // var aspect = window.innerWidth / window.innerHeight;
-    // this.camera = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -1000, 1000 );
-    this.camera_post = new THREE.PerspectiveCamera(
-      70,
-      window.innerWidth / window.innerHeight,
-      0.01,
-      1000
-    );
-    this.camera_post.position.set(0, 0, 500);
+    var frustumSize = 1;
+    var aspect = 1;
+    this.camera_post = new THREE.OrthographicCamera( frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, -1000, 1000 );
+    // this.camera_post = new THREE.PerspectiveCamera(
+    //   70,
+    //   window.innerWidth / window.innerHeight,
+    //   0.01,
+    //   1000
+    // );
+    // this.camera_post.position.set(0, 0, 500);
 
 
     this.camera.position.set(0, 0, 2);
@@ -117,7 +117,7 @@ export default class Sketch {
       vertexShader: vertex,
       fragmentShader: fragment_post
     });
-    this.mesh_post = new THREE.Mesh(new THREE.PlaneBufferGeometry(this.width, this.height), this.material_post);
+    this.mesh_post = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_post);
     this.scene_post = new THREE.Scene();
     this.scene_post.add(this.mesh_post);
   }
