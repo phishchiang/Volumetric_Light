@@ -6,7 +6,8 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 import fragment from "./shader/pp_volumetric_light/fragment.glsl";
 import vertex from "./shader/pp_volumetric_light/vertex.glsl";
-import fragment_post from "./shader/post/fragment.glsl";
+import PP_Volumetric_Light_FS from "./shader/post/PP_Volumetric_Light_FS.glsl";
+import PP_Chromatic_Aberration_FS from "./shader/post/PP_Chromatic_Aberration_FS.glsl";
 import rays_model from "../rays.glb";
 import * as dat from "dat.gui";
 import gsap from "gsap";
@@ -98,13 +99,13 @@ export default class Sketch {
   }
 
   initPost(){
-    this.render_texture = new THREE.WebGLRenderTarget(this.width, this.height, {
+    this.render_target_01 = new THREE.WebGLRenderTarget(this.width, this.height, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       format: THREE.RGBAFormat
     });
 
-    this.material_post = new THREE.ShaderMaterial({
+    this.material_PP_Volumetric_Light = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
       },
@@ -115,11 +116,36 @@ export default class Sketch {
         progress: { value: 0.6 },
       },
       vertexShader: vertex,
-      fragmentShader: fragment_post
+      fragmentShader: PP_Volumetric_Light_FS
     });
-    this.mesh_post = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_post);
-    this.scene_post = new THREE.Scene();
-    this.scene_post.add(this.mesh_post);
+    this.mesh_PP_Volumetric_Light = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_PP_Volumetric_Light);
+    this.scene_PP_Volumetric_Light = new THREE.Scene();
+    this.scene_PP_Volumetric_Light.add(this.mesh_PP_Volumetric_Light);
+
+    this.render_texture_02 = new THREE.WebGLRenderTarget(this.width, this.height, {
+      minFilter: THREE.LinearFilter,
+      magFilter: THREE.LinearFilter,
+      format: THREE.RGBAFormat
+    });
+
+    this.material_PP_Chromatic_Aberration = new THREE.ShaderMaterial({
+      extensions: {
+        derivatives: "#extension GL_OES_standard_derivatives : enable"
+      },
+      side: THREE.DoubleSide,
+      uniforms: {
+        u_map: { value: null },
+        tDiffuse: {value: null},
+        resolution: {value: null},
+        uTime: {value: 0},
+      },
+      vertexShader: vertex,
+      fragmentShader: PP_Chromatic_Aberration_FS
+    });
+
+    this.mesh_PP_Chromatic_Aberration = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_PP_Chromatic_Aberration);
+    this.scene_PP_Chromatic_Aberration = new THREE.Scene();
+    this.scene_PP_Chromatic_Aberration.add(this.mesh_PP_Chromatic_Aberration);
   }
 
   settings() {
@@ -219,17 +245,23 @@ export default class Sketch {
     this.material.uniforms.time.value = this.time;
     this.material.uniforms.progress.value = this.settings.progress;
     requestAnimationFrame(this.render.bind(this));
-    this.material_post.uniforms.progress.value = this.settings.progress;
+    this.material_PP_Volumetric_Light.uniforms.progress.value = this.settings.progress;
     
     this.mesh.rotation.y = -this.time/30;
 
-    this.renderer.setRenderTarget(this.render_texture);
+    // 1st Render
+    this.renderer.setRenderTarget(this.render_target_01);
     this.renderer.render(this.scene, this.camera);
-
-    this.material_post.uniforms.u_map.value = this.render_texture.texture;
+    this.material_PP_Volumetric_Light.uniforms.u_map.value = this.render_target_01.texture;
     
+    // 2nd Render Pass for Volumetric_Light
+    this.renderer.setRenderTarget(this.render_texture_02);
+    this.renderer.render(this.scene_PP_Volumetric_Light, this.camera_post);
+    this.material_PP_Chromatic_Aberration.uniforms.tDiffuse.value = this.render_texture_02.texture;
+
+    // 3rd Render Pass for Chromatic_Aberration
     this.renderer.setRenderTarget(null);
-    this.renderer.render(this.scene_post, this.camera_post);
+    this.renderer.render(this.scene_PP_Chromatic_Aberration, this.camera_post);
   }
 }
 
