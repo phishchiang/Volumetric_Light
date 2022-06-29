@@ -128,7 +128,7 @@ export default class Sketch {
       progress: 0.6,
     };
     this.gui = new dat.GUI();
-    this.gui.add(this.settings, "progress", 0, 6, 0.01);
+    this.gui.add(this.settings, "progress", 0, 2, 0.01);
   }
 
   setupResize() {

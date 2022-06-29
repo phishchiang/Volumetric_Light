@@ -7,6 +7,19 @@ uniform vec4 resolution;
 
 varying vec2 vUv;
 varying vec3 vPosition;
+
+// Photoshop Blending Mode
+// https://github.com/jamieowen/glsl-blend
+vec4 blendScreen(vec4 base, vec4 blend) {
+	return 1.0-((1.0-base)*(1.0-blend));
+}
+
+// GLSL Simple Random
+// https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
+float rand(vec2 co){
+	return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
 void main()	{
 	// vec2 newUV = (vUv - vec2(0.5))*resolution.zw + vec2(0.5);
 	vec4 t_original = texture2D(u_map, vUv);
@@ -14,19 +27,20 @@ void main()	{
 	vec2 uv_to_center = vec2(0.5) - vUv;
 
 
-	vec4 color = vec4(0.0);
-	float total = 0.0;
-	for(float i = 0.0; i < 40.0; i++){
-		float lerp = i/40.0; // 0 - 1
-		// float weight = 1.0;
-		float weight = sin(lerp * PI);
+	vec4 color_rays = vec4(0.0);
+	float sample_times = 20.0;
+	for(float i = 0.0; i < sample_times; i++){
+		// float lerp = i / sample_times; // 0 - 1
+		float lerp = (i + rand(vec2(vUv))) / sample_times; // 0 - 1
+		float weight = cos(lerp * PI * 0.5); // Check the graph on https://www.desmos.com/
 
 		vec4 t_sample = texture2D(u_map, vUv + uv_to_center * 0.3 * lerp);
 
-		t_sample.rgb = t_sample.rgb * t_sample.a;
-		color += t_sample * weight;
-		total = total + weight;
+		// t_sample.rgb = t_sample.rgb * t_sample.a;
+		color_rays = color_rays + t_sample * weight;
 	}
-	color.rgb = color.rgb / 20.0;
-	gl_FragColor = vec4(vec3(color.rgb), 1.0);
+	color_rays.rgb = color_rays.rgb / 10.0;
+
+	vec4 color_final = blendScreen(color_rays, t_original);
+	gl_FragColor = vec4(vec3(color_final.rgb), 1.0);
 }
