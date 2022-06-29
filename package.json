@@ -1,4 +1,10 @@
 {
+  "name": "nyancat",
+  "version": "1.0.0",
+  "description": "ISC",
+  "repository": "#",
+  "license": "UNLICENSED",
+  "author": "",
   "scripts": {
     "build": "parcel build index.html"
   },
