@@ -13,6 +13,7 @@ import * as dat from "dat.gui";
 import gsap from "gsap";
 import arrow_01 from "../arrow_01.fbx";
 import nyancat from "../nyancat.jpg";
+import nyancat_mp3 from "../nyancat.mp3";
 
 
 
@@ -66,13 +67,30 @@ export default class Sketch {
 
     this.isPlaying = true;
 
+    this.listener = new THREE.AudioListener();
+    this.camera.add( this.listener );
+
+    // create an Audio source
+    this.sound = new THREE.Audio( this.listener );
+    this.audioLoader = new THREE.AudioLoader();
+    this.audioLoader.load( nyancat_mp3, (buffer) => {
+      this.sound.setBuffer( buffer );
+      this.sound.setLoop(true);
+      this.sound.setVolume(0.5);
+      this.sound.play();
+    });
+
+    // create an AudioAnalyser, passing in the sound and desired fftSize
+    this.analyser = new THREE.AudioAnalyser( this.sound, 32 );
+
     this.addObjects();
     this.initPost();
     this.resize();
     this.render();
     this.setupResize();
-    this.settings();
+    // this.settings();
     this.addLights();
+    this.audioPlay();
 
     this.loader.load(rays_model, (gltf => {
       this.model = gltf.scene;
@@ -98,13 +116,28 @@ export default class Sketch {
 
   }
 
+  audioPlay(){
+    window.addEventListener('click', (event) => {
+      event.preventDefault(); 
+      console.log('click');
+      if(!this.sound.isPlaying)this.sound.play();
+      // this.sound.play();
+      this.audioLoader.load( nyancat_mp3, (buffer) => {
+        this.sound.setBuffer( buffer );
+        this.sound.setLoop(true);
+        this.sound.setVolume(0.5);
+        this.sound.play();
+      });
+    });
+  }
+
   initPost(){
     this.render_target_01 = new THREE.WebGLRenderTarget(this.width, this.height, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
       format: THREE.RGBAFormat
     });
-
+    
     this.material_PP_Volumetric_Light = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
@@ -114,6 +147,7 @@ export default class Sketch {
         time: { value: 0 },
         u_map: { value: null },
         progress: { value: 0.6 },
+        t_audio_data: { value: new THREE.DataTexture( this.analyser.data, 16, 1, THREE.RedFormat)},
       },
       vertexShader: vertex,
       fragmentShader: PP_Volumetric_Light_FS
@@ -246,6 +280,9 @@ export default class Sketch {
     this.material.uniforms.progress.value = this.settings.progress;
     requestAnimationFrame(this.render.bind(this));
     this.material_PP_Volumetric_Light.uniforms.progress.value = this.settings.progress;
+
+    this.analyser.getFrequencyData();
+    this.material_PP_Volumetric_Light.uniforms.t_audio_data.value.needsUpdate = true;
     
     this.mesh.rotation.y = -this.time/30;
 
