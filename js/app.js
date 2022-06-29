@@ -66,6 +66,8 @@ export default class Sketch {
     this.time = 0;
 
     this.isPlaying = true;
+    this.raycaster = new THREE.Raycaster();
+    this.pointer = new THREE.Vector2();
 
     this.listener = new THREE.AudioListener();
     this.camera.add( this.listener );
@@ -119,15 +121,24 @@ export default class Sketch {
   audioPlay(){
     window.addEventListener('click', (event) => {
       event.preventDefault(); 
-      console.log('click');
-      if(!this.sound.isPlaying)this.sound.play();
+
+      this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+      this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      // console.log(this.pointer);
+      // find intersections
+      this.raycaster.setFromCamera( this.pointer, this.camera );
+      const intersects = this.raycaster.intersectObjects( this.scene.children );
+      if (intersects.length > 0) {
+        if(!this.sound.isPlaying)this.sound.play();
+        // this.audioLoader.load( nyancat_mp3, (buffer) => {
+        //   this.sound.setBuffer( buffer );
+        //   this.sound.setLoop(true);
+        //   this.sound.setVolume(0.5);
+        //   this.sound.play();
+        // });
+      }
       // this.sound.play();
-      this.audioLoader.load( nyancat_mp3, (buffer) => {
-        this.sound.setBuffer( buffer );
-        this.sound.setLoop(true);
-        this.sound.setVolume(0.5);
-        this.sound.play();
-      });
+      
     });
   }
 
