@@ -63,6 +63,8 @@ export default class Sketch {
     this.camera.position.set(0, 0, 2);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.enablePan = false;
+    this.controls.enableDamping = true;
     this.time = 0;
 
     this.isPlaying = true;
@@ -115,32 +117,22 @@ export default class Sketch {
     });
 
     // console.log(nyancat);
-
+    
+    // this.render = this.render.bind(this);
   }
-
   audioPlay(){
     window.addEventListener('click', (event) => {
       event.preventDefault(); 
-      /*
-      this.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-      this.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-      // console.log(this.pointer);
-      // find intersections
-      this.raycaster.setFromCamera( this.pointer, this.camera );
-      const intersects = this.raycaster.intersectObjects( this.scene.children );
-      if (intersects.length > 0) {
-        if(!this.sound.isPlaying)this.sound.play();
-        this.audioLoader.load( nyancat_mp3, (buffer) => {
-          this.sound.setBuffer( buffer );
-          this.sound.setLoop(true);
-          this.sound.setVolume(0.5);
-          // this.sound.play();
-        });
-        console.log(this.sound);
+      if(!this.sound.isPlaying){
         this.sound.play();
+        console.log('stop');
+        this.material.uniforms.u_is_play.value = 1;
+      }else{
+        this.sound.stop();
+        console.log('playing');
+        this.material.uniforms.u_is_play.value = 0;
       }
-      */
-      this.sound.play();
+      
     });
   }
 
@@ -258,6 +250,7 @@ export default class Sketch {
         u_map: { value: texture_nyancat },
         progress: { value: 0.6 },
         resolution: { value: new THREE.Vector4() },
+        u_is_play: { value: 0 },
       },
       // wireframe: true,
       // transparent: true,
@@ -292,6 +285,8 @@ export default class Sketch {
     this.material.uniforms.time.value = this.time;
     this.material.uniforms.progress.value = this.settings.progress;
     requestAnimationFrame(this.render.bind(this));
+    // requestAnimationFrame(this.render);
+    this.controls.update();
     this.material_PP_Volumetric_Light.uniforms.progress.value = this.settings.progress;
 
     this.analyser.getFrequencyData();
