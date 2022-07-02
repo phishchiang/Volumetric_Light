@@ -85,7 +85,8 @@ float cnoise(vec3 P){
 
 float distored_position(vec3 p){
   float n = cnoise(p * 0.7 + vec3(time * 1.5));
-  return n;
+  float noise_mask = smoothstep(0.0, -0.2, p.y);
+  return n * noise_mask;
 }
 
 void main() {
