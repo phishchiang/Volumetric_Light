@@ -6,8 +6,8 @@ import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 
 import fragment from "./shader/pp_volumetric_light/fragment.glsl";
 import vertex from "./shader/pp_volumetric_light/vertex.glsl";
-import PP_Volumetric_Light_FS from "./shader/post/PP_Volumetric_Light_FS.glsl";
-import PP_Chromatic_Aberration_FS from "./shader/post/PP_Chromatic_Aberration_FS.glsl";
+import pp_volumetric_light_fs from "./shader/post/pp_volumetric_light_fs.glsl";
+import pp_chromatic_aberration_fs from "./shader/post/pp_chromatic_aberration_fs.glsl";
 import rays_model from "../rays.glb";
 import * as dat from "dat.gui";
 import gsap from "gsap";
@@ -155,7 +155,7 @@ export default class Sketch {
         t_audio_data: { value: new THREE.DataTexture( this.analyser.data, 16, 1, THREE.RedFormat)},
       },
       vertexShader: vertex,
-      fragmentShader: PP_Volumetric_Light_FS
+      fragmentShader: pp_volumetric_light_fs
     });
     this.mesh_PP_Volumetric_Light = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_PP_Volumetric_Light);
     this.scene_PP_Volumetric_Light = new THREE.Scene();
@@ -179,7 +179,7 @@ export default class Sketch {
         uTime: {value: 0},
       },
       vertexShader: vertex,
-      fragmentShader: PP_Chromatic_Aberration_FS
+      fragmentShader: pp_chromatic_aberration_fs
     });
 
     this.mesh_PP_Chromatic_Aberration = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_PP_Chromatic_Aberration);
