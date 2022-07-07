@@ -143,7 +143,7 @@ export default class Sketch {
       format: THREE.RGBAFormat
     });
     
-    this.material_PP_Volumetric_Light = new THREE.ShaderMaterial({
+    this.material_pp_volumetric_light = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
       },
@@ -157,9 +157,9 @@ export default class Sketch {
       vertexShader: vertex,
       fragmentShader: pp_volumetric_light_fs
     });
-    this.mesh_PP_Volumetric_Light = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_PP_Volumetric_Light);
-    this.scene_PP_Volumetric_Light = new THREE.Scene();
-    this.scene_PP_Volumetric_Light.add(this.mesh_PP_Volumetric_Light);
+    this.mesh_pp_volumetric_light = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_pp_volumetric_light);
+    this.scene_pp_volumetric_light = new THREE.Scene();
+    this.scene_pp_volumetric_light.add(this.mesh_pp_volumetric_light);
 
     this.render_texture_02 = new THREE.WebGLRenderTarget(this.width, this.height, {
       minFilter: THREE.LinearFilter,
@@ -167,7 +167,7 @@ export default class Sketch {
       format: THREE.RGBAFormat
     });
 
-    this.material_PP_Chromatic_Aberration = new THREE.ShaderMaterial({
+    this.material_pp_chromatic_aberration = new THREE.ShaderMaterial({
       extensions: {
         derivatives: "#extension GL_OES_standard_derivatives : enable"
       },
@@ -182,9 +182,9 @@ export default class Sketch {
       fragmentShader: pp_chromatic_aberration_fs
     });
 
-    this.mesh_PP_Chromatic_Aberration = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_PP_Chromatic_Aberration);
-    this.scene_PP_Chromatic_Aberration = new THREE.Scene();
-    this.scene_PP_Chromatic_Aberration.add(this.mesh_PP_Chromatic_Aberration);
+    this.mesh_pp_chromatic_aberration = new THREE.Mesh(new THREE.PlaneBufferGeometry(1, 1), this.material_pp_chromatic_aberration);
+    this.scene_pp_chromatic_aberration = new THREE.Scene();
+    this.scene_pp_chromatic_aberration.add(this.mesh_pp_chromatic_aberration);
   }
 
   settings() {
@@ -287,26 +287,26 @@ export default class Sketch {
     requestAnimationFrame(this.render.bind(this));
     // requestAnimationFrame(this.render);
     this.controls.update();
-    this.material_PP_Volumetric_Light.uniforms.progress.value = this.settings.progress;
+    this.material_pp_volumetric_light.uniforms.progress.value = this.settings.progress;
 
     this.analyser.getFrequencyData();
-    this.material_PP_Volumetric_Light.uniforms.t_audio_data.value.needsUpdate = true;
+    this.material_pp_volumetric_light.uniforms.t_audio_data.value.needsUpdate = true;
     
     this.mesh.rotation.y = -this.time/30;
 
     // 1st Render
     this.renderer.setRenderTarget(this.render_target_01);
     this.renderer.render(this.scene, this.camera);
-    this.material_PP_Volumetric_Light.uniforms.u_map.value = this.render_target_01.texture;
+    this.material_pp_volumetric_light.uniforms.u_map.value = this.render_target_01.texture;
     
     // 2nd Render Pass for Volumetric_Light
     this.renderer.setRenderTarget(this.render_texture_02);
-    this.renderer.render(this.scene_PP_Volumetric_Light, this.camera_post);
-    this.material_PP_Chromatic_Aberration.uniforms.tDiffuse.value = this.render_texture_02.texture;
+    this.renderer.render(this.scene_pp_volumetric_light, this.camera_post);
+    this.material_pp_chromatic_aberration.uniforms.tDiffuse.value = this.render_texture_02.texture;
 
     // 3rd Render Pass for Chromatic_Aberration
     this.renderer.setRenderTarget(null);
-    this.renderer.render(this.scene_PP_Chromatic_Aberration, this.camera_post);
+    this.renderer.render(this.scene_pp_chromatic_aberration, this.camera_post);
   }
 }
 
