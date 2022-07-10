@@ -294,19 +294,19 @@ export default class Sketch {
     
     this.mesh.rotation.y = -this.time/30;
 
-    // 1st Render
+    // Original Render
     this.renderer.setRenderTarget(this.render_target_01);
-    this.renderer.render(this.scene, this.camera);
-    this.material_pp_volumetric_light.uniforms.u_map.value = this.render_target_01.texture;
+    this.renderer.render(this.scene, this.camera); // OUT for original render
+    this.material_pp_volumetric_light.uniforms.u_map.value = this.render_target_01.texture; // IN for 1st pass render texture
     
-    // 2nd Render Pass for Volumetric_Light
+    // 1st Render Pass for Volumetric_Light
     this.renderer.setRenderTarget(this.render_texture_02);
-    this.renderer.render(this.scene_pp_volumetric_light, this.camera_post);
-    this.material_pp_chromatic_aberration.uniforms.tDiffuse.value = this.render_texture_02.texture;
-
-    // 3rd Render Pass for Chromatic_Aberration
+    this.renderer.render(this.scene_pp_volumetric_light, this.camera_post); // OUT for 1st pass render
+    this.material_pp_chromatic_aberration.uniforms.tDiffuse.value = this.render_texture_02.texture; // IN for 2nd pass render texture
+    
+    // 2nd Render Pass for Chromatic_Aberration
     this.renderer.setRenderTarget(null);
-    this.renderer.render(this.scene_pp_chromatic_aberration, this.camera_post);
+    this.renderer.render(this.scene_pp_chromatic_aberration, this.camera_post); // OUT for final 2nd pass render
   }
 }
 
